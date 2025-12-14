@@ -124,7 +124,6 @@ comfyServer:
 ## Directory Structure
 
 ```
-ml-platform-helmfile/
 ├── helmfile.yaml              # Main Helmfile
 ├── environments/
 │   ├── default.yaml           # Local cluster values
