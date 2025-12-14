@@ -8,9 +8,9 @@ This Helmfile configuration deploys a complete ML serving platform with:
 
 | Component | Version | Description |
 |-----------|---------|-------------|
-| Istio | 1.25.1 | Service mesh for traffic management and mTLS |
-| Knative Serving | 1.17.2 | Serverless runtime with scale-to-zero |
-| KServe | 0.15.0 | ML model serving with inference protocol |
+| Istio | 1.25.1 | Service mesh network layer |
+| Knative Serving | 1.17.2 | Serverless layer |
+| KServe | 0.15.0 | ML model serving layer |
 | ComfyServer | 0.2 | Custom runtime for ComfyUI workflows |
 
 > [!TIP]
@@ -92,7 +92,8 @@ istio:
 knativeServing:
   domain: "knative.example.com"  # Base domain for services
   timeouts:
-    revisionTimeout: 1200        # 20 min for long inference
+    revisionTimeout: 1200        # 20 min for long load times
+    responseStartTimeout: 1200    # 20 min for long load times
     maxRevisionTimeout: 2400     # 40 min max
   tls:
     enabled: true
