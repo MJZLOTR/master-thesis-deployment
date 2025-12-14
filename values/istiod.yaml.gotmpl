@@ -1,0 +1,18 @@
+# Istiod Helm values
+# https://istio.io/latest/docs/reference/config/istio.operator.v1alpha1/
+
+global:
+  istioNamespace: istio-system
+  
+pilot:
+  autoscaleEnabled: true
+  autoscaleMin: 1
+  autoscaleMax: 5
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+meshConfig:
+  enablePrometheusMerge: true
+  accessLogFile: /dev/stdout

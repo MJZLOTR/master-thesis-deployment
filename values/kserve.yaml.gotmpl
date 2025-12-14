@@ -1,0 +1,25 @@
+# KServe Helm values
+# https://github.com/kserve/kserve/tree/master/charts/kserve
+
+kserve:
+  controller:
+    deploymentMode: {{ .Values.kserve.deploymentMode }}
+    
+  gateway:
+    ingressGateway:
+      className: istio
+
+# Values for kserve-config chart
+storageInitializer:
+  image: {{ .Values.kserve.storageInitializer.image | quote }}
+  memoryRequest: {{ .Values.kserve.storageInitializer.memoryRequest | quote }}
+  memoryLimit: {{ .Values.kserve.storageInitializer.memoryLimit | quote }}
+  cpuRequest: {{ .Values.kserve.storageInitializer.cpuRequest | quote }}
+  cpuLimit: {{ .Values.kserve.storageInitializer.cpuLimit | quote }}
+  enableDirectPvcVolumeMount: {{ .Values.kserve.storageInitializer.enableDirectPvcVolumeMount }}
+
+ingress:
+  ingressGateway: {{ .Values.kserve.ingress.ingressGateway | quote }}
+  localGateway: {{ .Values.kserve.ingress.localGateway | quote }}
+  localGatewayService: {{ .Values.kserve.ingress.localGatewayService | quote }}
+  disableIstioVirtualHost: {{ .Values.kserve.ingress.disableIstioVirtualHost }}

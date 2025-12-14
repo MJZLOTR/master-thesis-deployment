@@ -1,0 +1,28 @@
+# ComfyServer ClusterServingRuntime values
+
+enabled: {{ .Values.comfyServer.enabled }}
+name: {{ .Values.comfyServer.name | quote }}
+{{- if .Values.comfyServer.registry }}
+image: {{ .Values.comfyServer.registry }}/{{ .Values.comfyServer.image }}
+{{- else }}
+image: {{ .Values.comfyServer.image | quote }}
+{{- end }}
+
+modelFormat:
+  name: {{ .Values.comfyServer.modelFormat.name | quote }}
+  version: {{ .Values.comfyServer.modelFormat.version | quote }}
+
+protocolVersions:
+{{- range .Values.comfyServer.protocolVersions }}
+  - {{ . }}
+{{- end }}
+
+resources:
+  requests:
+    cpu: {{ .Values.comfyServer.resources.requests.cpu | quote }}
+    memory: {{ .Values.comfyServer.resources.requests.memory | quote }}
+    gpu: {{ .Values.comfyServer.resources.requests.gpu | quote }}
+  limits:
+    cpu: {{ .Values.comfyServer.resources.limits.cpu | quote }}
+    memory: {{ .Values.comfyServer.resources.limits.memory | quote }}
+    gpu: {{ .Values.comfyServer.resources.limits.gpu | quote }}

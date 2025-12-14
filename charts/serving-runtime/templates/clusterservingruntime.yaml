@@ -1,0 +1,36 @@
+{{- if .Values.enabled }}
+# ClusterServingRuntime for ComfyServer
+# Registers ComfyServer as a serving runtime for the "comfy" model format
+apiVersion: serving.kserve.io/v1alpha1
+kind: ClusterServingRuntime
+metadata:
+  name: {{ .Values.name }}
+spec:
+  supportedModelFormats:
+    - name: {{ .Values.modelFormat.name }}
+      version: {{ .Values.modelFormat.version | quote }}
+      autoSelect: true
+      priority: 1
+  protocolVersions:
+    {{- range .Values.protocolVersions }}
+    - {{ . }}
+    {{- end }}
+  containers:
+    - name: kserve-container
+      image: {{ .Values.image }}
+      args:
+        - --http_port=8080
+        - --grpc_port=9000
+        - --predictor_protocol=v2
+        - --workers=1
+        - --model_name={{`{{.Name}}`}}
+      resources:
+        requests:
+          cpu: {{ .Values.resources.requests.cpu | quote }}
+          memory: {{ .Values.resources.requests.memory }}
+          nvidia.com/gpu: {{ .Values.resources.requests.gpu | quote }}
+        limits:
+          cpu: {{ .Values.resources.limits.cpu | quote }}
+          memory: {{ .Values.resources.limits.memory }}
+          nvidia.com/gpu: {{ .Values.resources.limits.gpu | quote }}
+{{- end }}

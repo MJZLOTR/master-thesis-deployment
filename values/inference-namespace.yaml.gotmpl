@@ -1,0 +1,19 @@
+# Inference Namespace Configuration
+
+namespace:
+  name: {{ .Values | get "inferenceNamespace.name" "inference" }}
+  labels: {{ .Values | get "inferenceNamespace.labels" dict | toYaml | nindent 4 }}
+  annotations: {{ .Values | get "inferenceNamespace.annotations" dict | toYaml | nindent 4 }}
+
+s3:
+  enabled: {{ .Values | get "inferenceNamespace.s3.enabled" false }}
+  secretName: {{ .Values | get "inferenceNamespace.s3.secretName" "s3creds" }}
+  serviceAccountName: {{ .Values | get "inferenceNamespace.s3.serviceAccountName" "sa-s3" }}
+  endpoint: {{ .Values | get "inferenceNamespace.s3.endpoint" "" | quote }}
+  useHttps: {{ .Values | get "inferenceNamespace.s3.useHttps" "1" | quote }}
+  region: {{ .Values | get "inferenceNamespace.s3.region" "" | quote }}
+  useAnonymousCredential: {{ .Values | get "inferenceNamespace.s3.useAnonymousCredential" "false" | quote }}
+  accessKeyId: {{ .Values | get "inferenceNamespace.s3.accessKeyId" "" | quote }}
+  secretAccessKey: {{ .Values | get "inferenceNamespace.s3.secretAccessKey" "" | quote }}
+  annotations: {{ .Values | get "inferenceNamespace.s3.annotations" dict | toYaml | nindent 4 }}
+  serviceAccountAnnotations: {{ .Values | get "inferenceNamespace.s3.serviceAccountAnnotations" dict | toYaml | nindent 4 }}

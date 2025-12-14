@@ -1,0 +1,21 @@
+# Knative Serving configuration values
+# Used by knative-config local chart
+
+domain: {{ .Values.knativeServing.domain | quote }}
+
+timeouts:
+  revisionTimeout: {{ .Values.knativeServing.timeouts.revisionTimeout }}
+  responseStartTimeout: {{ .Values.knativeServing.timeouts.responseStartTimeout }}
+  maxRevisionTimeout: {{ .Values.knativeServing.timeouts.maxRevisionTimeout }}
+
+tls:
+  enabled: {{ .Values.knativeServing.tls.enabled }}
+  clusterIssuer: {{ .Values.knativeServing.tls.clusterIssuer | quote }}
+
+features:
+  podspecNodeselector: {{ .Values.knativeServing.features.podspecNodeselector }}
+  podspecTolerations: {{ .Values.knativeServing.features.podspecTolerations }}
+
+observability:
+  metricsBackend: {{ .Values.knativeServing.observability.metricsBackend }}
+  reportingPeriod: {{ .Values.knativeServing.observability.reportingPeriod }}

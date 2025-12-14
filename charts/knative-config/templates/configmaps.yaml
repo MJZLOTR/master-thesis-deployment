@@ -1,0 +1,92 @@
+# KnativeServing Custom Resource
+# This creates the KnativeServing instance managed by the Knative Operator
+apiVersion: operator.knative.dev/v1beta1
+kind: KnativeServing
+metadata:
+  name: knative-serving
+  namespace: {{ .Release.Namespace }}
+spec:
+  # Version is auto-selected by the operator based on its bundled manifests
+  ingress:
+    istio:
+      enabled: true
+---
+# config-domain: Base domain for Knative Services
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-domain
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/part-of: knative-serving
+data:
+  {{ .Values.domain }}: ""
+---
+# config-defaults: Timeout configuration for long-running inference workloads
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-defaults
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/part-of: knative-serving
+data:
+  revision-timeout-seconds: "{{ .Values.timeouts.revisionTimeout }}"
+  revision-response-start-timeout-seconds: "{{ .Values.timeouts.responseStartTimeout }}"
+  max-revision-timeout-seconds: "{{ .Values.timeouts.maxRevisionTimeout }}"
+---
+# config-network: TLS and network configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-network
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/part-of: knative-serving
+data:
+  {{- if .Values.tls.enabled }}
+  external-domain-tls: "Enabled"
+  {{- else }}
+  external-domain-tls: "Disabled"
+  {{- end }}
+---
+# config-features: Kubernetes scheduling features for GPU workloads
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-features
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/part-of: knative-serving
+data:
+  kubernetes.podspec-nodeselector: {{ .Values.features.podspecNodeselector | quote }}
+  kubernetes.podspec-tolerations: {{ .Values.features.podspecTolerations | quote }}
+---
+# config-observability: Prometheus metrics configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-observability
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/part-of: knative-serving
+data:
+  metrics.backend-destination: {{ .Values.observability.metricsBackend | quote }}
+  metrics.request-metrics-backend-destination: {{ .Values.observability.metricsBackend | quote }}
+  metrics.reporting-period-seconds: "{{ .Values.observability.reportingPeriod }}"
+{{- if .Values.tls.enabled }}
+---
+# config-certmanager: Integration with cert-manager for TLS certificates
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-certmanager
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/part-of: knative-serving
+    networking.knative.dev/certificate-provider: cert-manager
+data:
+  issuerRef: |
+    kind: ClusterIssuer
+    name: {{ .Values.tls.clusterIssuer }}
+{{- end }}

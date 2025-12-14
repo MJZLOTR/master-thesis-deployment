@@ -1,0 +1,19 @@
+# Default values for inference-namespace chart
+
+namespace:
+  name: inference
+  labels: {}
+  annotations: {}
+
+s3:
+  enabled: false
+  secretName: s3creds
+  serviceAccountName: sa-s3
+  endpoint: ""
+  useHttps: "1"
+  region: ""
+  useAnonymousCredential: "false"
+  accessKeyId: ""
+  secretAccessKey: ""
+  annotations: {}
+  serviceAccountAnnotations: {}

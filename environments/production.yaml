@@ -1,0 +1,87 @@
+# Production environment values
+# Used for OTC CCE or production Kubernetes clusters
+
+# Istio configuration
+istio:
+  profile: default
+  ingressGateway:
+    enabled: true
+    serviceType: LoadBalancer
+    elb:
+      enabled: true
+      id: "<your-elb-id>"  # Set your ELB ID here
+      class: performance
+      algorithm: ROUND_ROBIN
+
+# Knative Serving configuration
+knativeServing:
+  domain: "<your-domain>"  # Set your domain
+  timeouts:
+    revisionTimeout: 1200
+    responseStartTimeout: 1200
+    maxRevisionTimeout: 2400
+  tls:
+    enabled: true
+    clusterIssuer: "opentelekomcloud-letsencrypt"
+  features:
+    podspecNodeselector: enabled
+    podspecTolerations: enabled
+  observability:
+    metricsBackend: prometheus
+    reportingPeriod: 30
+
+# KServe configuration
+kserve:
+  deploymentMode: Serverless
+  storageInitializer:
+    image: "kserve/storage-initializer:v0.15.0"
+    memoryRequest: "100Mi"
+    memoryLimit: "1Gi"
+    cpuRequest: "100m"
+    cpuLimit: "1"
+    enableDirectPvcVolumeMount: true
+  ingress:
+    ingressGateway: "knative-serving/knative-ingress-gateway"
+    localGateway: "knative-serving/knative-local-gateway"
+    localGatewayService: "knative-local-gateway.istio-system.svc.cluster.local"
+    disableIstioVirtualHost: false
+
+# ComfyServer Serving Runtime
+comfyServer:
+  enabled: true
+  name: kserve-comfyserve
+  image: "comfyserver:0.2-slim"
+  registry: "<your-registry>"  # e.g. ghcr.io/mjzlotr
+  modelFormat:
+    name: comfy
+    version: "1"
+  protocolVersions:
+    - v2
+    - grpc-v2
+  resources:
+    requests:
+      cpu: "1"
+      memory: 2Gi
+      gpu: "1"
+    limits:
+      cpu: "2"
+      memory: 4Gi
+      gpu: "1"
+
+# Inference Namespace Configuration
+inferenceNamespace:
+  name: "inference"  # Set your inference namespace name
+  labels: {}
+  annotations: {}
+  s3:
+    enabled: true
+    secretName: "s3creds"
+    serviceAccountName: "sa-s3"
+    endpoint: "<your-s3-endpoint>" # e.g. obs.eu-de.otc.t-systems.com
+    useHttps: "1"
+    region: "<your-region>" # e.g. eu-de
+    useAnonymousCredential: "false"
+    accessKeyId: "<your-access-key-id>"
+    secretAccessKey: "<your-secret-access-key>"
+    annotations: {}
+    serviceAccountAnnotations: {}

@@ -1,0 +1,160 @@
+environments:
+  default:
+    values:
+      - environments/default.yaml
+  production:
+    values:
+      - environments/production.yaml
+
+---
+repositories:
+  - name: istio
+    url: https://istio-release.storage.googleapis.com/charts
+  - name: knative-operator
+    url: https://knative.github.io/operator
+
+helmDefaults:
+  wait: true
+  waitForJobs: true
+  timeout: 600
+
+releases:
+  #############################################################################
+  # Layer 1: Istio Service Mesh
+  #############################################################################
+  - name: istio-base
+    namespace: istio-system
+    createNamespace: true
+    chart: istio/base
+    version: 1.25.1
+    labels:
+      layer: istio
+
+  - name: istiod
+    namespace: istio-system
+    chart: istio/istiod
+    version: 1.25.1
+    needs:
+      - istio-system/istio-base
+    values:
+      - values/istiod.yaml.gotmpl
+    labels:
+      layer: istio
+
+  - name: istio-ingressgateway
+    namespace: istio-system
+    chart: istio/gateway
+    version: 1.25.1
+    needs:
+      - istio-system/istiod
+    values:
+      - values/istio-gateway.yaml.gotmpl
+    skipSchemaValidation: true
+    labels:
+      layer: istio
+
+
+  #############################################################################
+  # Layer 2: Knative Serving
+  #############################################################################
+  - name: knative-operator
+    namespace: knative-operator
+    createNamespace: true
+    chart: knative-operator/knative-operator
+    version: 1.17.2
+    needs:
+      - istio-system/istiod
+    labels:
+      layer: knative
+    hooks:
+      - events: ["postsync"]
+        showlogs: true
+        command: "kubectl"
+        args:
+          - "wait"
+          - "--for=condition=Available"
+          - "deployment/knative-operator"
+          - "-n"
+          - "knative-operator"
+          - "--timeout=180s"
+
+  - name: knative-serving-config
+    namespace: knative-serving
+    createNamespace: true
+    chart: ./charts/knative-config
+    needs:
+      - knative-operator/knative-operator
+    values:
+      - values/knative.yaml.gotmpl
+    labels:
+      layer: knative
+    hooks:
+      # Apply net-istio controller after KnativeServing CR
+      - events: ["postsync"]
+        showlogs: true
+        command: "kubectl"
+        args:
+          - "apply"
+          - "-f"
+          - "https://github.com/knative/net-istio/releases/download/knative-v1.17.0/net-istio.yaml"
+      # Wait for Knative Serving to be ready
+      - events: ["postsync"]
+        showlogs: true
+        command: "kubectl"
+        args:
+          - "wait"
+          - "--for=condition=Ready"
+          - "knativeserving/knative-serving"
+          - "-n"
+          - "knative-serving"
+          - "--timeout=300s"
+
+  #############################################################################
+  # Layer 3: KServe
+  #############################################################################
+  - name: kserve-crd
+    namespace: kserve
+    createNamespace: true
+    chart: oci://ghcr.io/kserve/charts/kserve-crd
+    version: v0.15.0
+    needs:
+      - knative-serving/knative-serving-config
+    labels:
+      layer: kserve
+
+  - name: kserve
+    namespace: kserve
+    chart: oci://ghcr.io/kserve/charts/kserve
+    version: v0.15.0
+    needs:
+      - kserve/kserve-crd
+    values:
+      - values/kserve.yaml.gotmpl
+    labels:
+      layer: kserve
+
+  #############################################################################
+  # Layer 4: Custom ClusterServingRuntime
+  #############################################################################
+  - name: comfyserver-runtime
+    namespace: kserve
+    chart: ./charts/serving-runtime
+    needs:
+      - kserve/kserve
+    values:
+      - values/comfyserver.yaml.gotmpl
+    labels:
+      layer: serving-runtime
+
+  #############################################################################
+  # Layer 5: Inference Namespace with S3 Credentials
+  #############################################################################
+  - name: inference-namespace
+    namespace: kserve
+    chart: ./charts/inference-namespace
+    needs:
+      - kserve/kserve
+    values:
+      - values/inference-namespace.yaml.gotmpl
+    labels:
+      layer: inference-namespace

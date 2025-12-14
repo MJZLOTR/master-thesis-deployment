@@ -1,0 +1,13 @@
+# Istio Ingress Gateway values
+
+# For kind cluster, use ClusterIP instead of LoadBalancer
+service:
+  type: {{ .Values.istio.ingressGateway.serviceType | default "LoadBalancer" }}
+{{- if .Values.istio.ingressGateway.elb.enabled }}
+  annotations:
+    kubernetes.io/elb.class: {{ .Values.istio.ingressGateway.elb.class }}
+    kubernetes.io/elb.lb-algorithm: {{ .Values.istio.ingressGateway.elb.algorithm }}
+{{- if .Values.istio.ingressGateway.elb.id }}
+    kubernetes.io/elb.id: {{ .Values.istio.ingressGateway.elb.id | quote }}
+{{- end }}
+{{- end }}

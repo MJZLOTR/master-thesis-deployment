@@ -1,0 +1,88 @@
+# Default environment values
+# Used for local/development environments (e.g., kind cluster)
+
+# Istio configuration
+istio:
+  profile: default
+  ingressGateway:
+    enabled: true
+    serviceType: ClusterIP  # Use ClusterIP for kind
+    elb:
+      enabled: false
+      id: ""
+      class: performance
+      algorithm: ROUND_ROBIN
+
+# Knative Serving configuration
+knativeServing:
+  domain: "example.com"
+  timeouts:
+    revisionTimeout: 1200
+    responseStartTimeout: 1200
+    maxRevisionTimeout: 2400
+  tls:
+    enabled: true  # Disabled for local testing
+    clusterIssuer: "letsencrypt-prod"
+  features:
+    podspecNodeselector: enabled
+    podspecTolerations: enabled
+  observability:
+    metricsBackend: prometheus
+    reportingPeriod: 30
+
+# KServe configuration
+kserve:
+  deploymentMode: Serverless
+  storageInitializer:
+    image: "kserve/storage-initializer:v0.15.0"
+    memoryRequest: "100Mi"
+    memoryLimit: "1Gi"
+    cpuRequest: "100m"
+    cpuLimit: "1"
+    enableDirectPvcVolumeMount: true
+  ingress:
+    ingressGateway: "knative-serving/knative-ingress-gateway"
+    localGateway: "knative-serving/knative-local-gateway"
+    localGatewayService: "knative-local-gateway.istio-system.svc.cluster.local"
+    disableIstioVirtualHost: false
+
+# ComfyServer Serving Runtime
+comfyServer:
+  enabled: true
+  name: kserve-comfyserver
+  image: "comfyserver:0.2-slim"
+  registry: ""  # Set registry prefix if using private registry
+  modelFormat:
+    name: comfy
+    version: "1"
+  protocolVersions:
+    - v2
+    - grpc-v2
+  resources:
+    requests:
+      cpu: "1"
+      memory: 2Gi
+      gpu: "1"
+    limits:
+      cpu: "2"
+      memory: 4Gi
+      gpu: "1"
+
+# Inference Namespace Configuration
+inferenceNamespace:
+  name: "inference"  # Inference namespace name
+  labels: {}
+  annotations: {}
+  s3:
+    enabled: false  # Disabled for local development
+    secretName: "s3creds"
+    serviceAccountName: "sa-s3"
+    endpoint: ""
+    useHttps: "1"
+    region: ""
+    useAnonymousCredential: "false"
+    accessKeyId: ""
+    secretAccessKey: ""
+    annotations: {}
+    serviceAccountAnnotations: {}
+
