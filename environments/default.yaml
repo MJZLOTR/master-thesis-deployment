@@ -45,6 +45,9 @@ kserve:
     localGateway: "knative-serving/knative-local-gateway"
     localGatewayService: "knative-local-gateway.istio-system.svc.cluster.local"
     disableIstioVirtualHost: false
+  metricsAggregator:
+    enableMetricAggregation: false  # Disabled for local development
+    enablePrometheusScraping: false
 
 # ComfyServer Serving Runtime
 comfyServer:

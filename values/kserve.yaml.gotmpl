@@ -23,3 +23,7 @@ ingress:
   localGateway: {{ .Values.kserve.ingress.localGateway | quote }}
   localGatewayService: {{ .Values.kserve.ingress.localGatewayService | quote }}
   disableIstioVirtualHost: {{ .Values.kserve.ingress.disableIstioVirtualHost }}
+
+metricsAggregator:
+  enableMetricAggregation: {{ .Values.kserve.metricsAggregator.enableMetricAggregation | quote }}
+  enablePrometheusScraping: {{ .Values.kserve.metricsAggregator.enablePrometheusScraping | quote }}
