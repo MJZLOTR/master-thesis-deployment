@@ -96,6 +96,12 @@ knativeServing:
   tls:
     enabled: true
     clusterIssuer: "letsencrypt-prod"
+  features:
+    podspecNodeselector: enabled  # Allow node selector in pod specs
+    podspecTolerations: enabled   # Allow tolerations for GPU/tainted nodes
+  observability:
+    metricsBackend: prometheus    # Metrics backend (prometheus)
+    reportingPeriod: 30           # Metrics reporting interval (seconds)
 ```
 
 #### KServe
@@ -105,6 +111,9 @@ kserve:
   deploymentMode: Serverless
   storageInitializer:
     enableDirectPvcVolumeMount: true  # Fast PVC mounting
+  metricsAggregator:
+    enableMetricAggregation: true     # Aggregate metrics from inference pods
+    enablePrometheusScraping: true    # Expose metrics for Prometheus scraping
 ```
 
 #### ComfyServer Runtime
