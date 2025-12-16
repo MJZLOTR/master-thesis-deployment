@@ -1,5 +1,3 @@
-# ML Platform Helmfile
-
 Automated installation of **Istio**, **Knative Serving**, **KServe**, and custom **ClusterServingRuntime** using Helmfile.
 
 ## Overview
